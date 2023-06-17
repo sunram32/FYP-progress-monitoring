@@ -1,0 +1,65 @@
+/* general styles */
+th, td {
+    padding-top: 15px !important;
+    padding-bottom: 15px !important;
+}
+
+.btn:focus {
+    border: none !important;
+}
+
+.login-background-container {
+    background: linear-gradient(#203970, #fff);
+    min-height: 100vh;
+}
+
+.dropdown-menu {
+    width: 320px;
+}
+
+.sidebar {
+    width: 250px;
+    min-height: 100vh;
+}
+
+.recent-items-container {
+    max-height: calc(100vh - 368px);
+}
+
+.nav-button {
+    width: 50px;
+    height: 50px;
+    border: none !important;
+}
+
+.cp1-projects tbody tr, .cp2-projects tbody tr, .meeting-records tbody tr, .task-table tbody tr, .resource-table tbody tr, .subtask-table i, .home-task-container > div {
+    cursor: pointer;
+}
+
+.tasks-container, .task-details-container, .resources-container, .resource-details-container {
+    height: calc(100vh - 128px);
+}
+
+.notification-icon-container {
+    width: 56px !important;
+}
+
+.home-icon-container {
+    width: 48px;
+}
+
+.message-timestamp {
+    font-size: 13px !important;
+}
+
+@media (max-width: 992px) {
+    #meeting-record-form {
+        width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar.hidden {
+        margin-left: -250px;
+    }
+}

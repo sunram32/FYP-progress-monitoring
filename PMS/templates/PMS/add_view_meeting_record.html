@@ -1,0 +1,79 @@
+{% extends "PMS/logged_in_layout.html" %} 
+{% load static %}
+
+{% block logged_in_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block header_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block project_nav %} 
+    <div class="project-nav ms-4 ps-2">
+        <a href="{% url 'tasks' project_id %}" class="text-decoration-none p-1 me-5">Tasks</a>
+        <a href="{% url 'gantt' project_id %}" class="text-decoration-none p-1 me-5">Gantt</a>
+        <a href="{% url 'meeting_records' project_id %}" class="text-decoration-none p-1 me-5 border-bottom border-secondary border-2 text-secondary">Meeting Records</a>
+        <a href="{% url 'resources' project_id %}" class="text-decoration-none p-1 me-5">Resources</a>
+    </div>
+{% endblock %}
+
+{% block hr_spacing_adjustments %} 
+    mt-1
+{% endblock %}
+
+{% block main_content %} 
+    <div class="mx-5 px-3 my-4 py-2 d-flex">
+        <div class="container">
+            <a href="{% url 'meeting_records' project_id %}" class="link-primary text-decoration-none">Back</a>
+            <h4 class="my-3">Meeting Record Form</h4>
+            <form action="" method="post" class="w-50" id="meeting-record-form">
+                {% if user.role == "STUDENT" %}
+                    {% if not meeting_record or meeting_record.approved is False %}
+                        {% csrf_token %}
+                        {{ form }}
+                        <button class="btn btn-primary" type="submit">Submit</button>
+                    {% else %}
+                        <fieldset disabled="disabled">
+                            {{ form }}
+                        </fieldset>
+                    {% endif %}
+                {% else %}
+                    <fieldset disabled="disabled">
+                        {{ form }}
+                    </fieldset>
+                {% endif %}
+            </form>
+            {% if user.role == "SUPERVISOR" and meeting_record.approved is None %}
+                <form action="{% url 'approve_meeting_record' project_id %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ meeting_record.id }}">
+                    <button class="btn btn-primary me-3" name="approved" value="approved">Approve</button>
+                </form>
+                <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#rejectMeetingRecordModal">Reject</button>
+                <div class="modal fade" id="rejectMeetingRecordModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title">Reject Meeting Record</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="{% url 'reject_meeting_record' project_id %}" method="post" id="reject-meeting-record-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ meeting_record.id }}">
+                                <label for="rejectReason" class="form-label">Reason</label>
+                                <input type="text" name="reject_reason" id="rejectReason" class="form-control" required>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="close-modal" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary" form="reject-meeting-record-form" id="rejectMeetingRecord">Reject</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

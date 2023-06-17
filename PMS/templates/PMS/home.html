@@ -1,0 +1,269 @@
+{% extends "PMS/logged_in_layout.html" %} 
+{% load static %}
+
+{% block logged_in_title %} 
+    Home
+{% endblock %}
+
+{% block header_title %} 
+    Home
+{% endblock %}
+
+{% block main_content %} 
+    <div class="mx-5 px-3 my-4 py-2 d-flex">
+        <div class="container">
+            <div class="col-md-10 col mx-auto">
+                {% if user.role == "SUPERVISOR" %}
+                <div class="lecturer-view">
+                    <div class="d-flex justify-content-between my-2">
+                        <h4>Notifications</h4>
+                        <a href="{% url 'notifications' %}" class="link-primary text-decoration-none">See All</a>
+                    </div>
+                    <div class="notifications-container border rounded border-2 border-muted px-4">
+                        {% for notification in notifications %}
+                            <div class="notification d-flex justify-content-between my-4">
+                                <div class="d-flex align-items-center">
+                                    {% if notification.type == "TASK_OVERDUE" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-exclamation-triangle"></i>
+                                        </div>
+                                        <a href="project/{{ notification.overdue_task.project.id }}/tasks?task={{ notification.overdue_task.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.overdue_task.project.project_title }}</h6>
+                                                <p class="m-0">Task Overdue: {{ notification.overdue_task.title }}</p>
+                                            </div>
+                                        </a>
+                                    
+                                    {% elif notification.type == "NEW_TASK" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-tasks"></i>
+                                        </div>
+                                        <a href="project/{{ notification.new_task.project.id }}/tasks?task={{ notification.new_task.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.new_task.project.project_title }}</h6>
+                                                <p class="m-0">New Task Added: {{ notification.new_task.title }}</p>
+                                            </div>
+                                        </a>
+                                        
+                                    {% elif notification.type == "CHAT_TASK" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-comment"></i>
+                                        </div>
+                                        <a href="project/{{ notification.chat_task.project.id }}/tasks?task={{ notification.chat_task.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.chat_task.project.project_title }}</h6>
+                                                <p class="m-0">New Message In Task: {{ notification.chat_task.title }}</p>
+                                            </div>
+                                        </a>
+
+                                    {% elif notification.type == "NEW_RESOURCE" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-file"></i>
+                                        </div>
+                                        <a href="project/{{ notification.new_resource.project.id }}/resources?resource={{ notification.new_resource.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.new_resource.project.project_title }}</h6>
+                                                <p class="m-0">New Resource Added: {{ notification.new_resource.title }}</p>
+                                            </div>
+                                        </a>
+
+                                    {% elif notification.type == "CHAT_RESOURCE" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-comment"></i>
+                                        </div>
+                                        <a href="project/{{ notification.chat_resource.project.id }}/resources?resource={{ notification.chat_resource.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.chat_resource.project.project_title }}</h6>
+                                                <p class="m-0">New Message In Resource: {{ notification.chat_resource.title }}</p>
+                                            </div>
+                                        </a>
+
+                                    {% elif notification.type == "NEW_MEETING_RECORD" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-file-text"></i>
+                                        </div>
+                                        <a href="project/{{ notification.new_meeting_record.project.id }}/meeting_records" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.new_meeting_record.project.project_title }}</h6>
+                                                <p class="m-0">New Meeting Record: Meeting on {{ notification.new_meeting_record.date | date:"d/m/Y" }}</p>
+                                            </div>                                    
+                                        </a>
+
+                                    {% elif notification.type == "UPDATED_MEETING_RECORD" %}
+                                        <div class="notification-icon-container">
+                                            <i class="
+                                                fa 
+                                                fa-2x
+                                                {% if notification.updated_meeting_record.approved %} 
+                                                    fa-check-circle
+                                                {% else %} 
+                                                    fa-exclamation-triangle
+                                                {% endif %}
+                                            "></i>
+                                        </div>
+                                        <a href="project/{{ notification.updated_meeting_record.project.id }}/meeting_records" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.updated_meeting_record.project.project_title }}</h6>
+                                                <p class="m-0">
+                                                    {% if notification.updated_meeting_record.approved %} 
+                                                        Meeting Record Approved: Meeting on {{ notification.updated_meeting_record.date | date:"d/m/Y"}}
+                                                    {% else %} 
+                                                        Resubmission Required: Meeting on {{ notification.updated_meeting_record.date | date:"d/m/Y"}}
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div>{{ notification.timestamp | date:"d/m" }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <h4 class="mt-5">Projects</h4>
+                    <hr>
+                    <div class="project-container row text-center">
+                        {% for project in projects %} 
+                            <div class="col-lg-3 col-md-4 col-6 mb-3" onclick="navigateToProject({{project.id}})" role="button">
+                                <i class="fa {{ generate_random_icon }} fa-5x"></i>
+                                <br>
+                                <span>{{ project.project_title }}</span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                {% if user.role == "STUDENT" %}
+                <div class="student-view">
+                    <div class="d-flex justify-content-between my-2">
+                        <h4>Upcoming Tasks</h4>
+                        <a href="{% url 'project' user_profile.project.id %}" class="link-primary text-decoration-none">See All</a>
+                    </div>
+                    <div class="home-task-container border rounded border-2 border-muted px-4">
+                        {% for task in first_four_unfinished_tasks %}
+                            <div class="d-flex justify-content-between my-3" onclick="navigateToProject({{ user_profile.project.id }}, {{ task.id }})">
+                                <div class="d-flex align-items-center">
+                                    <div class="home-icon-container">
+                                        <i class="fa fa-2x fa-check-circle"></i>
+                                    </div>
+                                    <span>{{ task.title }}</span>
+                                </div>
+                                <div class="
+                                    {% if task.is_overdue %} 
+                                        text-danger
+                                        fw-bold
+                                    {% endif %}
+                                ">{{ task.due_date |date:"m/d" }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <br><br>
+                    <div class="d-flex justify-content-between my-2">
+                        <h4>Notifications</h4>
+                        <a href="{% url 'notifications' %}" class="link-primary text-decoration-none">See All</a>
+                    </div>
+                    <div class="notifications-container border rounded border-2 border-muted px-4">
+                        {% for notification in notifications %} 
+                            <div class="notification d-flex justify-content-between my-4">
+                                <div class="d-flex align-items-center">
+                                    {% if notification.type == "TASK_OVERDUE" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-exclamation-triangle"></i>
+                                        </div>
+                                        <a href="project/{{ notification.overdue_task.project.id }}/tasks?task={{ notification.overdue_task.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.overdue_task.project.project_title }}</h6>
+                                                <p class="m-0">Task Overdue: {{ notification.overdue_task.title }}</p>
+                                            </div>
+                                        </a>
+                                        
+                                    {% elif notification.type == "NEW_TASK" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-tasks"></i>
+                                        </div>
+                                        <a href="project/{{ notification.new_task.project.id }}/tasks?task={{ notification.new_task.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.new_task.project.project_title }}</h6>
+                                                <p class="m-0">New Task Added: {{ notification.new_task.title }}</p>
+                                            </div>
+                                        </a>
+                                        
+                                    {% elif notification.type == "CHAT_TASK" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-comment"></i>
+                                        </div>
+                                        <a href="project/{{ notification.chat_task.project.id }}/tasks?task={{ notification.chat_task.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.chat_task.project.project_title }}</h6>
+                                                <p class="m-0">New Message In Task: {{ notification.chat_task.title }}</p>
+                                            </div>
+                                        </a>
+
+                                    {% elif notification.type == "NEW_RESOURCE" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-file"></i>
+                                        </div>
+                                        <a href="project/{{ notification.new_resource.project.id }}/resources?resource={{ notification.new_resource.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.new_resource.project.project_title }}</h6>
+                                                <p class="m-0">New Resource Added: {{ notification.new_resource.title }}</p>
+                                            </div>
+                                        </a>
+
+                                    {% elif notification.type == "CHAT_RESOURCE" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-comment"></i>
+                                        </div>
+                                        <a href="project/{{ notification.chat_resource.project.id }}/resources?resource={{ notification.chat_resource.id }}" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.chat_resource.project.project_title }}</h6>
+                                                <p class="m-0">New Message In Resource: {{ notification.chat_resource.title }}</p>
+                                            </div>
+                                        </a>
+
+                                    {% elif notification.type == "NEW_MEETING_RECORD" %}
+                                        <div class="notification-icon-container">
+                                            <i class="fa fa-2x fa-file-text"></i>
+                                        </div>
+                                        <a href="project/{{ notification.new_meeting_record.project.id }}/meeting_records" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.new_meeting_record.project.project_title }}</h6>
+                                                <p class="m-0">New Meeting Record: Meeting on {{ notification.new_meeting_record.date | date:"d/m/Y" }}</p>
+                                            </div>                                    
+                                        </a>
+
+                                    {% elif notification.type == "UPDATED_MEETING_RECORD" %}
+                                        <div class="notification-icon-container">
+                                            <i class="
+                                                fa 
+                                                fa-2x
+                                                {% if notification.updated_meeting_record.approved %} 
+                                                    fa-check-circle
+                                                {% else %} 
+                                                    fa-exclamation-triangle
+                                                {% endif %}
+                                            "></i>
+                                        </div>
+                                        <a href="project/{{ notification.updated_meeting_record.project.id }}/meeting_records" class="text-black text-decoration-none">
+                                            <div>
+                                                <h6 class="fw-bold m-0">{{ notification.updated_meeting_record.project.project_title }}</h6>
+                                                <p class="m-0">
+                                                    {% if notification.updated_meeting_record.approved %} 
+                                                        Meeting Record Approved: Meeting on {{ notification.updated_meeting_record.date | date:"d/m/Y"}}
+                                                    {% else %} 
+                                                        Resubmission Required: Meeting on {{ notification.updated_meeting_record.date | date:"d/m/Y"}}
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                                <div>{{ notification.timestamp | date:"d/m" }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

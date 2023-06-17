@@ -1,0 +1,157 @@
+{% extends "PMS/logged_in_layout.html" %} 
+{% load static %}
+
+{% block logged_in_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block header_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block project_nav %} 
+    <div class="project-nav ms-4 ps-2">
+        <a href="{% url 'tasks' project_id %}" class="text-decoration-none p-1 me-5">Tasks</a>
+        <a href="{% url 'gantt' project_id %}" class="text-decoration-none p-1 me-5">Gantt</a>
+        <a href="{% url 'meeting_records' project_id %}" class="text-decoration-none p-1 me-5">Meeting Records</a>
+        <a href="{% url 'resources' project_id %}" class="text-decoration-none p-1 me-5 border-bottom border-secondary border-2 text-secondary">Resources</a>
+    </div>
+{% endblock %}
+
+{% block hr_spacing_adjustments %} 
+    mt-1 mb-0
+{% endblock %}
+
+{% block main_content %} 
+    <script src="{% static 'PMS/scripts/resources.js' %}" defer></script>
+    <div class="failed-add-resource toast text-white bg-danger border-0 top-0 start-50 translate-middle-x position-absolute mt-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa fa-exclamation-triangle me-1"></i>
+                An error occured, please try again.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="added-new-resource toast text-white bg-success border-0 top-0 start-50 translate-middle-x position-absolute mt-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa fa-check me-1"></i>
+                Successfully added new resource.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="d-flex">
+        <div class="resources-container overflow-auto w-50 ms-4 ps-3 pt-4">
+            <button class="btn btn-outline-primary mb-3" data-bs-toggle="modal" data-bs-target="#addResourceModal">+ Add Resource</button>
+            <div class="modal fade" id="addResourceModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">New Resource</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="" method="post" id="new-resource-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="project_id" value="{{ project_id }}">
+                            {{ new_resource_form }}
+                            <label for="task" class="form-label">Task (optional)</label>
+                            <select name="task_id" id="task" class="form-select">
+                                <option value="" disabled selected hidden>Select a task</option>
+                                {% for task in task_list %} 
+                                    <option value="{{ task.id }}">{{ task.category }}: {{ task.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" id="close-modal" data-bs-dismiss="modal">Close</button>
+                      <button type="submit" class="btn btn-primary" form="new-resource-form" id="add-resource">Add Resource</button>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            {% for category in categories %}
+                <h5 class="border-bottom pb-3 mt-4 mb-0">{{ category }}</h5>
+                <table class="resource-table table table-hover text-start" id="{{category}}-table">
+                    <tbody>
+                        {% for resource in resource_list %} 
+                            {% if resource.category == category %} 
+                                <tr id="resource-{{ resource.id }}-row" data-resource-id="{{ resource.id }}">
+                                    <td><span class="ms-3">{{ resource.title }}</span></td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
+        </div>
+        {% for resource in resource_list %} 
+            <div class="w-50 shadow-left resource-details-container overflow-auto d-none" id="resource-{{ resource.id }}-details">
+                <div class="p-4">
+                    <h3 class="mb-4">{{ resource.title }}</h3>
+                    <div class="row my-3">
+                        <p class="text-muted col-4">Description</p>
+                        <p class="col-8">{{ resource.description }}</p>
+                    </div>
+                    <div class="row my-3">
+                        <p class="text-muted col-4">File</p>
+                        <p class="col-8 text-primary fw-bold">
+                            <a href="
+                                {% if resource.file_name %} 
+                                    {{ resource.file_name.url }}
+                                {% endif %}" 
+                                target="_blank"
+                                class="text-decoration-none">
+                                {{ resource.get_file_name }}
+                            </a>
+                        </p>
+                    </div>
+                    <div class="row my-3">
+                        <p class="text-muted col-4">Link</p>
+                        <p class="col-8 text-primary fw-bold">
+                            <a href="{{ resource.file_URL }}" target="_blank" class="text-decoration-none">{{ resource.file_URL }}</a>
+                        </p>
+                    </div>
+                    <div class="mt-5" id="message-container-{{resource.id}}">
+                        <h3 class="border-bottom pb-3 mb-4">Chat</h3>
+                        {% for message in message_list %} 
+                            {% if message.resource == resource %} 
+                                {% if message.user == user %}
+                                    <div class="chat-item-self d-flex justify-content-end">
+                                        <p class="border rounded-start p-2 mb-2">
+                                            <span class="text-muted message-timestamp">{{message.timestamp |date:"m/d H:i"}}</span>
+                                            <br>
+                                            {{ message.text }}
+                                        </p>
+                                        <img src="{{ message.user.picture.url }}" alt="" width="40px" height="40px" class="border rounded-circle ms-3">
+                                    </div>
+                                {% else %}
+                                    <div class="chat-item-other d-flex">
+                                        <img src="{{ message.user.picture.url }}" alt="" width="40px" height="40px" class="border rounded-circle me-3">
+                                        <p class="border rounded-end p-2 mb-2">
+                                            <span class="text-muted message-timestamp">{{message.timestamp |date:"m/d H:i"}}</span>
+                                            <br>
+                                            {{ message.text }}
+                                        </p>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="bg-light px-4 shadow-top d-flex h-25 py-4">
+                    <img src="{{ user.picture.url }}" alt="" width="50px" height="50px" class="border rounded-circle me-3 user-picture">
+                    <form action="" method="post" class="position-relative w-100">
+                        {% csrf_token %}
+                        <input type="hidden" name="resource_id" value="{{ resource.id }}">
+                        <textarea class="form-control h-100 pb-4 message-box" name="message" placeholder="Enter your message here" required></textarea>
+                        <i class="submit-new-message fa fa-paper-plane position-absolute bottom-0 end-0 mx-4 my-2 text-muted" data-resource-id="{{ resource.id }}"></i>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

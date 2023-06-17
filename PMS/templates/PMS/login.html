@@ -1,0 +1,86 @@
+{% extends "PMS/layout.html" %}
+{% load static %} 
+
+{% block title %} 
+    Login
+{% endblock %} 
+
+{% block content %} 
+    <script src="{% static 'PMS/scripts/login.js' %}" defer></script>
+    <div class="failed-auth toast text-white bg-danger border-0 top-0 start-50 translate-middle-x position-absolute mt-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa fa-exclamation-triangle me-1"></i>
+                Invalid credentials. Please try again.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="logged-out toast text-white bg-success border-0 top-0 start-50 translate-middle-x position-absolute mt-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa fa-check me-1"></i>
+                Successfully Logged Out
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="login-background-container">
+        <div class="col-xl-3 col-lg-4 col-md-7 col-sm-9 col-11 mx-auto">
+            <img src="{% static 'PMS/images/SU_logo.png' %}" alt="Sunway University Logo" class="img-fluid">
+        </div>
+        <div class="login-container mx-auto col-xl-4 col-lg-5 col-md-7 col-sm-9 col-11 border rounded shadow p-4 m-5 bg-white">
+            <div class="d-flex justify-content-between">
+                <h1 class="mb-4 fw-bold">Sign In</h1>
+                <button class="btn text-primary p-0 d-none" id="back-button">Back</button>
+            </div>
+            <div class="user-selection my-5">
+                <button class="btn btn-primary my-3 py-2 w-100 rounded-pill fs-5 shadow" id="select-student-login">I'm a student</button>
+                <button class="btn btn-primary my-3 py-2 w-100 rounded-pill fs-5 shadow" id="select-supervisor-login">I'm a supervisor</button>
+            </div>
+            <div class="student-login d-none">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Student ID</label>
+                        <input type="text" name="username" id="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary my-4 fs-5 w-100 rounded-pill">Sign In</button>
+                </form>
+            </div>
+            <div class="supervisor-login d-none">
+                <form action="{% url 'login' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Staff ID</label>
+                        <input type="text" name="username" id="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" name="password" id="password" class="form-control" required>
+                    </div>
+                    <button class="btn btn-primary my-4 fs-5 w-100 rounded-pill">Sign In</button>
+                </form>
+            </div>
+        <!-- <p class="text-secondary">New User? <a href="{% url 'login' %}" class="link-primary">Click here</a> to sign up</p> -->
+        </div>
+    </div>
+
+    {% if failed_auth %}
+    <script>
+        const failedAuthToast = new bootstrap.Toast(document.querySelector('.failed-auth'));
+        failedAuthToast.show();
+    </script>
+    {% endif %}
+
+    {% if logged_out %}
+    <script>
+        const loggedOutToast = new bootstrap.Toast(document.querySelector('.logged-out'));
+        loggedOutToast.show();
+    </script>
+    {% endif %}
+{% endblock %}

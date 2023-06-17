@@ -1,0 +1,80 @@
+{% extends "PMS/logged_in_layout.html" %} 
+{% load static %}
+
+{% block logged_in_title %} 
+    Projects
+{% endblock %}
+
+{% block header_title %}
+    Projects
+{% endblock %}
+
+{% block main_content %} 
+    <div class="mx-5 px-3 my-4 py-2 d-flex">
+        <div class="container">
+            <h4>Capstone 1</h4>
+            <table class="cp1-projects table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Student</th>
+                        <th>Status</th>
+                        <th>Updates</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %} 
+                        {% if student.capstone_status == "CP1" %}
+                            <tr onclick="navigateToProject({{ student.project.id }})">
+                                <td>{{ student.project.project_title }}</td>
+                                <td>{{ student.last_name }}</td>
+                                <td class="
+                                    {% if student.project.get_status == 'On Track' %}
+                                        table-success
+                                    {% elif student.project.get_status == 'Slightly Behind Schedule' %} 
+                                        table-warning
+                                    {% else %} 
+                                        table-danger
+                                    {% endif %}
+                                ">{{ student.project.get_status }}</td>
+                                <td>1</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br><br>
+            <h4>Capstone 2</h4>
+            <table class="cp2-projects table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Student</th>
+                        <th>Status</th>
+                        <th>Updates</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %} 
+                        {% if student.capstone_status == "CP2" %}
+                            <tr onclick="navigateToProject({{ student.project.id }})">
+                                <td>{{ student.project.project_title }}</td>
+                                <td>{{ student.last_name }}</td>
+                                <td class="
+                                    {% if student.project.get_status == 'On Track' %}
+                                        table-success
+                                    {% elif student.project.get_status == 'Slightly Behind Schedule' %} 
+                                        table-warning
+                                    {% else %} 
+                                        table-danger
+                                    {% endif %}
+                                ">{{ student.project.get_status }}</td>
+                                <td>1</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

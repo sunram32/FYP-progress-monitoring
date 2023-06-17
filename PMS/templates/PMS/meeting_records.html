@@ -1,0 +1,87 @@
+{% extends "PMS/logged_in_layout.html" %} 
+{% load static %}
+
+{% block logged_in_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block header_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block project_nav %} 
+    <div class="project-nav ms-4 ps-2">
+        <a href="{% url 'tasks' project_id %}" class="text-decoration-none p-1 me-5">Tasks</a>
+        <a href="{% url 'gantt' project_id %}" class="text-decoration-none p-1 me-5">Gantt</a>
+        <a href="{% url 'meeting_records' project_id %}" class="text-decoration-none p-1 me-5 border-bottom border-secondary border-2 text-secondary">Meeting Records</a>
+        <a href="{% url 'resources' project_id %}" class="text-decoration-none p-1 me-5">Resources</a>
+    </div>
+{% endblock %}
+
+{% block hr_spacing_adjustments %} 
+    mt-1
+{% endblock %}
+
+{% block main_content %} 
+    <div class="submitted-new-meeting-record toast text-white bg-success border-0 top-0 start-50 translate-middle-x position-absolute mt-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa fa-check me-1"></i>
+                Successfully added new meeting record.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="status-updated toast text-white bg-success border-0 top-0 start-50 translate-middle-x position-absolute mt-4" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="fa fa-check me-1"></i>
+                Status updated.
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
+    <div class="mx-5 px-3 my-4 py-2 d-flex">
+        <div class="container">
+            {% if user.role == "STUDENT" %}
+                <a href="{% url 'add_meeting_record' project_id %}"><button class="btn btn-outline-primary float-end mb-3">+ New</button></a>
+            {% endif %}
+            <table class="meeting-records table table-hover text-center">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in meeting_records %}
+                        <tr onclick="location.href=`{% url 'view_edit_meeting_records' project_id record.id %}`">
+                            <td>{{ record.date }}</td>
+                            {% if record.approved is None %}
+                                <td class="table-warning">Pending</td>
+                            {% elif record.approved is True %}
+                                <td class="table-success">Approved</td>
+                            {% else %} 
+                                <td class="table-danger">Resubmission Required</td>
+                            {% endif %}
+                            <td>{{ record.reject_reason }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% if submitted %}
+        <script>
+            const newMeetingRecordToast = new bootstrap.Toast(document.querySelector('.submitted-new-meeting-record'));
+            newMeetingRecordToast.show();
+        </script>
+    {% endif %}
+    {% if status_updated %} 
+        <script>
+            const statusUpdatedToast = new bootstrap.Toast(document.querySelector('.status-updated'));
+            statusUpdatedToast.show();
+        </script>
+    {% endif %}
+{% endblock %}

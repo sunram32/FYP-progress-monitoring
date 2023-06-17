@@ -1,0 +1,85 @@
+{% extends "PMS/logged_in_layout.html" %} 
+{% load static %}
+
+{% block logged_in_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block header_title %} 
+    {{ project_title }}
+{% endblock %}
+
+{% block project_nav %} 
+    <div class="project-nav ms-4 ps-2">
+        <a href="{% url 'tasks' project_id %}" class="text-decoration-none p-1 me-5">Tasks</a>
+        <a href="{% url 'gantt' project_id %}" class="text-decoration-none p-1 me-5 border-bottom border-secondary border-2 text-secondary">Gantt</a>
+        <a href="{% url 'meeting_records' project_id %}" class="text-decoration-none p-1 me-5">Meeting Records</a>
+        <a href="{% url 'resources' project_id %}" class="text-decoration-none p-1 me-5">Resources</a>
+    </div>
+{% endblock %}
+
+{% block hr_spacing_adjustments %} 
+    mt-1
+{% endblock %}
+
+{% block main_content %} 
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script type="text/javascript">
+    google.charts.load('current', {'packages':['gantt']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function daysToMilliseconds(days) {
+      return days * 24 * 60 * 60 * 1000;
+    }
+
+    function drawChart() {
+
+      var data = new google.visualization.DataTable();
+      data.addColumn('string', 'Task ID');
+      data.addColumn('string', 'Task Name');
+      data.addColumn('date', 'Start Date');
+      data.addColumn('date', 'End Date');
+      data.addColumn('number', 'Duration');
+      data.addColumn('number', 'Percent Complete');
+      data.addColumn('string', 'Dependencies');
+
+      data.addRows([
+        {% for task in task_list %}
+          ["{{task.id}}", "{{task.title}}", new Date({{task.start_date.year}}, {{task.start_date.month}}, {{task.start_date.day}}), new Date({{task.due_date.year}}, {{task.due_date.month}}, {{task.due_date.day}}), null,  100,
+          {% if task.dependency %}
+            "{{task.dependency.id}}"
+          {% else %}
+            null
+          {% endif %}
+          ],
+        {% endfor %}
+
+      ]);
+
+      var trackHeight = 40;
+
+      var options = {
+          height: data.getNumberOfRows() * trackHeight + 40,
+          width: "100%",
+          hAxis: {
+              textStyle: {
+                  fontName: ["RobotoCondensedRegular"]
+              }
+          },
+          gantt: {
+              labelStyle: {
+              fontName: ["RobotoCondensedRegular"],
+              fontSize: 12,
+              color: '#757575',
+              },
+              trackHeight: trackHeight
+          }
+      };
+
+      var chart = new google.visualization.Gantt(document.getElementById('chart_div'));
+
+      chart.draw(data, options);
+    }
+  </script>
+  <div id="chart_div" class="m-5"></div>
+{% endblock %}
